@@ -94,6 +94,8 @@ def get_series_data(rows: list[dict], run_id: str) -> dict:
         elif row.get("nprob") not in ("N/A", "", None):
             eps = row.get("epsilon", "")
             label = f"{row['nprob']} e{eps}"
+        elif row.get("probes") not in ("N/A", "", None):
+            label = f"probes={row['probes']}"
         else:
             label = row.get("benchmark_name", "")
 
@@ -230,8 +232,8 @@ def main():
         parser.print_help()
         return
 
-    if len(run_ids) < 2:
-        print("Need at least 2 runs to compare.")
+    if not run_ids:
+        print("No runs specified.")
         return
 
     # Build series data
@@ -243,8 +245,8 @@ def main():
         else:
             print(f"No benchmark data found for run {rid}")
 
-    if len(series_list) < 2:
-        print("Need at least 2 series with data to compare.")
+    if not series_list:
+        print("No series with data found.")
         return
 
     # Generate charts
