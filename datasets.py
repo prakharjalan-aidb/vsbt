@@ -111,6 +111,49 @@ DATASETS = {
         "s3_prefix": "s3://enterprisedb-vector-datasets/openai/5m",
         "base_dir": os.path.join(DATA_DIR, "openai/5m"),
     },
+    # --- CI/CD subsets of openai-500k (real slices, ground truth recomputed
+    #     against the subset). Tiny; downloaded from S3 like the other parquet
+    #     datasets. Generated offline via utils/generate_openai_subsets.py. ---
+    "openai-1k-cos": {
+        "type": "parquet",
+        "metric": "cos",
+        "dim": 1536,
+        "num": 1_000,
+        "s3_prefix": "s3://enterprisedb-vector-datasets/openai/1k",
+        "base_dir": os.path.join(DATA_DIR, "openai/1k"),
+    },
+    "openai-5k-cos": {
+        "type": "parquet",
+        "metric": "cos",
+        "dim": 1536,
+        "num": 5_000,
+        "s3_prefix": "s3://enterprisedb-vector-datasets/openai/5k",
+        "base_dir": os.path.join(DATA_DIR, "openai/5k"),
+    },
+    "openai-10k-cos": {
+        "type": "parquet",
+        "metric": "cos",
+        "dim": 1536,
+        "num": 10_000,
+        "s3_prefix": "s3://enterprisedb-vector-datasets/openai/10k",
+        "base_dir": os.path.join(DATA_DIR, "openai/10k"),
+    },
+    "openai-20k-cos": {
+        "type": "parquet",
+        "metric": "cos",
+        "dim": 1536,
+        "num": 20_000,
+        "s3_prefix": "s3://enterprisedb-vector-datasets/openai/20k",
+        "base_dir": os.path.join(DATA_DIR, "openai/20k"),
+    },
+    "openai-50k-cos": {
+        "type": "parquet",
+        "metric": "cos",
+        "dim": 1536,
+        "num": 50_000,
+        "s3_prefix": "s3://enterprisedb-vector-datasets/openai/50k",
+        "base_dir": os.path.join(DATA_DIR, "openai/50k"),
+    },
     # --- Synthetic toy dataset for fast end-to-end pipeline smoke tests ---
     "toy-5-cos": {
         "type": "parquet",
