@@ -9,6 +9,8 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
+from utils.generate_toy_dataset import main as _generate_toy_dataset
+
 # --- CONFIGURATION ---
 DATA_DIR = os.environ.get("DATASET_LOCAL_DIR", "./datasets")
 DATASETS = {
@@ -108,6 +110,16 @@ DATASETS = {
         "num_shards": 10,
         "s3_prefix": "s3://enterprisedb-vector-datasets/openai/5m",
         "base_dir": os.path.join(DATA_DIR, "openai/5m"),
+    },
+    # --- Synthetic toy dataset for fast end-to-end pipeline smoke tests ---
+    "toy-5-cos": {
+        "type": "parquet",
+        "metric": "cos",
+        "dim": 8,
+        "num": 5,
+        "is_toy_dataset": True,
+        "base_dir": os.path.join(DATA_DIR, "toy/5"),
+        "generate_toy_dataset": _generate_toy_dataset,
     },
     "cohere-1m-cos": {
         "type": "parquet",
@@ -419,6 +431,8 @@ def _load_parquet(name, info):
 
     if info.get("s3_prefix") and not os.path.exists(os.path.join(base_dir, "test.parquet")):
         _download_parquet_from_s3(info["s3_prefix"], base_dir, info["num"], info.get("num_shards"))
+    elif info.get("is_toy_dataset") and not os.path.exists(os.path.join(base_dir, "test.parquet")):
+        info["generate_toy_dataset"]()
 
     if not os.path.exists(base_dir):
         raise FileNotFoundError(f"Dataset directory not found: {base_dir}")
