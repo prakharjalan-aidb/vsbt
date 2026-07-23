@@ -162,7 +162,6 @@ DATASETS = {
         "s3_prefix": "s3://enterprisedb-vector-datasets/laion/50k",
         "base_dir": os.path.join(DATA_DIR, "laion/50k"),
     },
-    # --- Synthetic toy dataset for fast end-to-end pipeline smoke tests ---
     "cohere-1m-cos": {
         "type": "parquet",
         "metric": "cos",
