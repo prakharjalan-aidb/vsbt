@@ -1,9 +1,9 @@
-edb_vectorplus-ivfplus-openai-500k-707:
+edb_vectorplus-ivfplus-openai-500k-2k:
   indexType: ivfplus
   dataset: openai-500k-cos
   datasetType: parquet
   metric: cos
-  lists: 707  # ~sqrt(500k)
+  lists: 2000
   maintenance_work_mem: 1GB
   pg_parallel_workers: 32
   top: 10

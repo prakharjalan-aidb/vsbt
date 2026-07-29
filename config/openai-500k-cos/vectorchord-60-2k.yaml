@@ -10,7 +10,7 @@ vc-openai-500k-60-2k:
   # NOTE: rerank_in_table is NOT VectorChord's recommended default — it trades
   # query latency for a smaller index. Enabled here for testing only.
   # See https://docs.vectorchord.ai/vectorchord/usage/rerank-in-table.html
-  rerank_in_table: true
+#  rerank_in_table: true
   pg_parallel_workers: 32
   top: 10
   benchmarks:

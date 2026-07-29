@@ -38,4 +38,10 @@ datasets:
         suite: pgvector_suite.py
       - path: config/cohere-3m-cos/vectorchord-140-12k.yaml
         suite: vectorchord_suite.py
+  openai-5m-cos:
+      configs:
+      - path: config/openai-5m-cos/edb_vectorplus-ivfplus-2236.yaml
+        suite: pgvector_suite.py
+      - path: config/openai-5m-cos/vectorchord-180-16k.yaml
+        suite: vectorchord_suite.py
 
