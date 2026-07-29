@@ -1,9 +1,9 @@
-edb_vectorplus-ivfplus-cohere-2m-1414:
+edb_vectorplus-ivfplus-cohere-2m-8k:
   indexType: ivfplus
   dataset: openai-2m-cos
   datasetType: parquet
   metric: cos
-  lists: 1414 #sqrt(2m)
+  lists: 8192
   maintenance_work_mem: 8GB
   pg_parallel_workers: 32
   top: 10

@@ -1,9 +1,9 @@
-edb_vectorplus-ivfplus-cohere-3m-1800:
+edb_vectorplus-ivfplus-cohere-3m-12k:
   indexType: ivfplus
-  dataset: cohere-2m-cos
+  dataset: cohere-3m-cos
   datasetType: parquet
   metric: cos
-  lists: 1800 #sqrt(3m)
+  lists: 12000
   maintenance_work_mem: 12GB
   pg_parallel_workers: 32
   top: 10

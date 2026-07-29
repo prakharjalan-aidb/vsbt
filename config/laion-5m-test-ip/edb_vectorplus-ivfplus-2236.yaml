@@ -1,9 +1,9 @@
-edb_vectorplus-ivfplus-laion-5m-2236:
+edb_vectorplus-ivfplus-laion-5m-8k:
   indexType: ivfplus
   dataset: laion-5m-test-ip
   datasetType: hdf5
   metric: cos
-  lists: 2236  # ~sqrt(5M)
+  lists: 8192  # ~sqrt(5M)
   rotation: true
   maintenance_work_mem: 4GB
   pg_parallel_workers: 32

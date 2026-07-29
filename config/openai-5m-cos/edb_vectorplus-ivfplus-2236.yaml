@@ -1,9 +1,9 @@
-edb_vectorplus-ivfplus-openai-5m-2236:
+edb_vectorplus-ivfplus-openai-5m-16k:
   indexType: ivfplus
   dataset: openai-5m-cos
   datasetType: parquet
   metric: cos
-  lists: 2236  # ~sqrt(5M)
+  lists: 16384
   rotation: true
   maintenance_work_mem: 4GB
   pg_parallel_workers: 32
