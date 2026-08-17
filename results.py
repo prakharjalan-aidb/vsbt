@@ -413,12 +413,12 @@ class ResultsManager:
                     ["Build Threads", str(results.get("build_threads", "N/A"))],
                     ["K-means Hierarchical", str(config.get("kmeans_hierarchical", "N/A"))],
                 ])
-        elif suite_type in ("pgvector-ivfflat", "pgvector-ivfflat-bq-rerank", "edb_vectorplus"):
-            # New pgvector index types (and other new suite_types) ship
-            # their own column specs; the caller passes config_columns
-            # from the suite. Each entry is
+        elif config_columns:
+            # Any suite that ships its own column specs routes here: the
+            # caller passes config_columns from the suite, so a new suite
+            # needs no change in this file. Each entry is
             # (label, extractor(config_dict, results_dict) -> str).
-            for label, extractor in (config_columns or []):
+            for label, extractor in config_columns:
                 config_rows.append([label, extractor(config, results)])
 
         lines.extend(format_markdown_table(["Parameter", "Value"], config_rows))
@@ -440,8 +440,9 @@ class ResultsManager:
 
         # --- Benchmark Results ---
         benchmarks = config.get("benchmarks", {})
-        is_ivfflat = suite_type in ("pgvector-ivfflat", "pgvector-ivfflat-bq-rerank", "edb_vectorplus")
-        bench_cols = bench_columns if is_ivfflat else None
+        # Suites that ship their own benchmark column specs render the generic
+        # table; the rest keep their legacy hard-coded columns.
+        bench_cols = bench_columns
         bench_rows = []
         for bench_name, bench_config in benchmarks.items():
             if bench_name in results and isinstance(results[bench_name], dict) and "recall" in results[bench_name]:
@@ -454,10 +455,9 @@ class ResultsManager:
                         f"{br['p50_latency']:.2f}",
                         f"{br['p99_latency']:.2f}",
                     ])
-                elif is_ivfflat:
-                    # New pgvector index types: caller-supplied bench_cols
-                    # determine which benchmark dict keys become columns.
-                    row = [str(bench_config.get(key, "N/A")) for key, _ in (bench_cols or [])]
+                elif bench_cols:
+                    # bench_cols picks which benchmark dict keys become columns.
+                    row = [str(bench_config.get(key, "N/A")) for key, _ in bench_cols]
                     row += [
                         f"{br['recall']:.4f}",
                         f"{br['qps']:.2f}",
@@ -480,8 +480,8 @@ class ResultsManager:
             if suite_type == "pgvector":
                 lines.extend(format_markdown_table(
                     ["EF Search", "Recall", "QPS", "P50 (ms)", "P99 (ms)"], bench_rows))
-            elif is_ivfflat:
-                headers = [h for _, h in (bench_cols or [])] + [
+            elif bench_cols:
+                headers = [h for _, h in bench_cols] + [
                     "Recall", "QPS", "P50 (ms)", "P99 (ms)"
                 ]
                 lines.extend(format_markdown_table(headers, bench_rows))
@@ -589,8 +589,9 @@ class ResultsManager:
         # --- Benchmark Results (unified table across all runs, ordered by timestamp) ---
         lines.extend(["", "---", "", "## Benchmark Results", ""])
 
-        is_ivfflat = suite_type in ("pgvector-ivfflat", "pgvector-ivfflat-bq-rerank", "edb_vectorplus")
-        bench_cols = bench_columns if is_ivfflat else None
+        # Suites that ship their own benchmark column specs render the generic
+        # table; the rest keep their legacy hard-coded columns.
+        bench_cols = bench_columns
 
         bench_rows = []
         for run_data in all_runs:
@@ -619,10 +620,10 @@ class ResultsManager:
                             f"{br['p50_latency']:.2f}",
                             f"{br['p99_latency']:.2f}",
                         ])
-                    elif is_ivfflat:
+                    elif bench_cols:
                         bench_rows.append(
                             [run_date, sb, str(qc)]
-                            + [str(bench_config.get(key, "N/A")) for key, _ in (bench_cols or [])]
+                            + [str(bench_config.get(key, "N/A")) for key, _ in bench_cols]
                             + [
                                 f"{br['recall']:.4f}",
                                 f"{br['qps']:.2f}",
@@ -649,10 +650,10 @@ class ResultsManager:
                     ["Date", "shared_buffers", "Clients",
                      "EF Search", "Recall", "QPS", "P50 (ms)", "P99 (ms)"],
                     bench_rows))
-            elif is_ivfflat:
+            elif bench_cols:
                 lines.extend(format_markdown_table(
                     ["Date", "shared_buffers", "Clients"]
-                    + [h for _, h in (bench_cols or [])]
+                    + [h for _, h in bench_cols]
                     + ["Recall", "QPS", "P50 (ms)", "P99 (ms)"],
                     bench_rows))
             else:

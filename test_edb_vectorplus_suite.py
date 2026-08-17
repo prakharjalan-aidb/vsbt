@@ -1,0 +1,72 @@
+"""Self-check for edb_vectorplus_suite's pure helpers. No DB, no framework.
+
+    python test_edb_vectorplus_suite.py
+"""
+
+import edb_vectorplus_suite as vp
+
+
+def _raises(fn, *args):
+    try:
+        fn(*args)
+    except ValueError:
+        return True
+    return False
+
+
+def demo():
+    # --- metric tables ---
+    assert vp.metric_opclass("cos") == "vector_cosine_ops"
+    assert vp.metric_opclass("euclidean") == "vector_l2_ops"
+    assert vp.metric_operator("ip") == "<#>"
+    assert _raises(vp.metric_opclass, "jaccard")
+    assert _raises(vp.metric_operator, "jaccard")
+
+    # --- lists resolution ---
+    assert vp.resolve_lists({"lists": 2236}, {"num": 5_000_000}) == 2236
+    assert vp.resolve_lists({"lists": "auto"}, {"num": 1_000_000}) == 1000
+    assert vp.resolve_lists({"lists": "AUTO"}, {"num": 4}) == 2
+    assert _raises(vp.resolve_lists, {"lists": 0}, {"num": 10})
+    assert _raises(vp.resolve_lists, {"lists": "none"}, {"num": 10})
+
+    # --- session GUCs ---
+    assert vp.probe_gucs({"probes": 80})[0] == "SET ivfplus.probes = 80"
+    assert "SET enable_seqscan = off" in vp.probe_gucs({"probes": 1})
+    assert vp.fixed_gucs({}) == []
+    assert vp.fixed_gucs({"lists": 10}) == []          # unrelated keys ignored
+    assert vp.fixed_gucs({"iterative_scan": "relaxed_order", "max_probes": 2000}) == [
+        "SET ivfplus.iterative_scan = 'relaxed_order'",
+        "SET ivfplus.max_probes = 2000",
+    ]
+    assert vp.fixed_gucs({"hierarchy_threshold": 4}) == [
+        "SET ivfplus.hierarchy_threshold = 4"
+    ]
+
+    # --- DDL ---
+    ddl = vp.create_index_sql(
+        "cohere_1m_cos", {"lists": 1000}, {"metric": "cos", "num": 1_000_000}
+    )
+    assert "CREATE INDEX cohere_1m_cos_embedding_idx ON cohere_1m_cos" in ddl
+    assert "USING ivfplus (embedding vector_cosine_ops)" in ddl
+    assert "lists = 1000" in ddl
+    assert "rotation = true" in ddl
+
+    # --- query template matches common.TestSuite.warmup_query ---
+    import common
+    sql, bind = common.TestSuite.warmup_query(
+        None, "tbl", {}, "<=>", 10, {"probes": 20}
+    )
+    assert sql == vp.search_query_sql("tbl", "<=>", 10)
+    assert bind("q") == ("q",)
+
+    # --- report column specs ---
+    label, extract = vp.CONFIG_COLUMNS[0]
+    assert label == "Lists"
+    assert extract({"lists": 1000}, {}) == "1000"
+    assert extract({}, {"lists": 2236}) == "2236"
+    assert vp.BENCH_COLUMNS == (("probes", "Probes"),)
+
+
+if __name__ == "__main__":
+    demo()
+    print("ok")
