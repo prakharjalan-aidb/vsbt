@@ -8,8 +8,8 @@ pgvector-ivfflat-cohere-1m-1k:
   pg_parallel_workers: 32
   top: 10
   benchmarks:
-    "10":  { probes: 10 }
-    "30":  { probes: 30 }
-    "60":  { probes: 60 }
-    "100": { probes: 100 }
-    "200": { probes: 200 }
+    "20":  { probes: 20 }
+    "40":  { probes: 40 }
+    "80":  { probes: 80 }
+    "150": { probes: 150 }
+    "300": { probes: 300 }

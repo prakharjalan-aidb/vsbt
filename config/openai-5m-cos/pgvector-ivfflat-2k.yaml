@@ -1,4 +1,4 @@
-pgvector-ivfflat-openai-5m-2k:
+pgvector-ivfflat-openai-5m-2236:
   indexType: ivfflat
   dataset: openai-5m-cos
   datasetType: parquet
