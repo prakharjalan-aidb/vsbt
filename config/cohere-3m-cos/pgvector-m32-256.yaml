@@ -1,0 +1,34 @@
+pgvector-cohere-3m-m32-256:
+  dataset: cohere-3m-cos
+  datasetType: parquet
+  pg_parallel_workers: 32
+  metric: cos
+  m: 32
+  efConstruction: 256
+  # Sized to keep the whole graph in memory during build (11.9 GB graph, ~7.7 GB on-disk).
+  # Below this, pgvector spills to the much slower on-disk insertion path
+  # and the resulting graph is worse. Lower it only if the server under
+  # test genuinely has less RAM.
+  maintenance_work_mem: 13GB
+  top: 10
+  # efSearch grid is chosen by TARGET RECALL, not by matching ivfplus probe
+  # counts -- equal numbers mean very different recall for the two indexes.
+  # IVF recall tracks the fraction of lists scanned and climbs gradually;
+  # HNSW recall saturates fast (ef=10 is already ~0.90 at top=10, and past
+  # ~200 it buys nothing but costs QPS). These points spread across the
+  # 0.90-0.997 band so the two curves overlap where it matters and QPS can
+  # be read off at equal recall.
+  #
+  # CALIBRATE AFTER THE FIRST RUN: the suite prints recall per point. If the
+  # measured recall clusters (e.g. everything lands above 0.99), shift these
+  # values -- the index is built once and every point reuses it, so adding
+  # or moving efSearch points costs query time only, no rebuild.
+  benchmarks:
+    "10":  { efSearch: 10 }   # target recall ~0.90
+    "15":  { efSearch: 15 }   # target recall ~0.93
+    "20":  { efSearch: 20 }   # target recall ~0.95
+    "30":  { efSearch: 30 }   # target recall ~0.965
+    "45":  { efSearch: 45 }   # target recall ~0.978
+    "70":  { efSearch: 70 }   # target recall ~0.987
+    "110": { efSearch: 110 }   # target recall ~0.993
+    "200": { efSearch: 200 }   # target recall ~0.997

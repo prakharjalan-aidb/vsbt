@@ -1,9 +1,9 @@
-edb_vectorplus-ivfplus-openai-1m-cos-4k:
+edb_vectorplus-ivfplus-openai-1m-cos-1k:
   indexType: ivfplus
   dataset: openai-1m-cos
   datasetType: parquet
   metric: cos
-  lists: 4096
+  lists: 1000
   maintenance_work_mem: 4GB
   pg_parallel_workers: 32
   top: 10
@@ -12,8 +12,8 @@ edb_vectorplus-ivfplus-openai-1m-cos-4k:
   # max_probes: 2000
   # hierarchy_threshold: 4
   benchmarks:
-    "20":  { probes: 20 }
-    "40":  { probes: 40 }
-    "80":  { probes: 80 }
-    "150": { probes: 150 }
-    "300": { probes: 300 }
+    "10":  { probes: 10 }
+    "30":  { probes: 30 }
+    "60":  { probes: 60 }
+    "100": { probes: 100 }
+    "200": { probes: 200 }
