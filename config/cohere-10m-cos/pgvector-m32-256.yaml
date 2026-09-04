@@ -1,0 +1,22 @@
+pgvector-cohere-10m-m32-256:
+  dataset: cohere-10m-cos
+  datasetType: parquet
+  pg_parallel_workers: 32
+  metric: cos
+  m: 32
+  efConstruction: 256
+  # 10M x 768-dim vectors (~30 GB) plus the m=32 neighbour lists; sized so the
+  # build stays in memory. Lower only if the server has less RAM (build then
+  # falls back to the much slower on-disk insertion path).
+  maintenance_work_mem: 48GB
+  top: 10
+  # efSearch grid chosen by target recall to match the other m32-256 configs.
+  benchmarks:
+    "10":  { efSearch: 10 }   # target recall ~0.90
+    "15":  { efSearch: 15 }   # target recall ~0.93
+    "20":  { efSearch: 20 }   # target recall ~0.95
+    "30":  { efSearch: 30 }   # target recall ~0.965
+    "45":  { efSearch: 45 }   # target recall ~0.978
+    "70":  { efSearch: 70 }   # target recall ~0.987
+    "110": { efSearch: 110 }  # target recall ~0.993
+    "200": { efSearch: 200 }  # target recall ~0.997

@@ -1,0 +1,52 @@
+# Four-way comparison (pgvector HNSW, pgvector IVFFlat, VectorChord, edb_vectorplus ivfplus)
+# across every OpenAI and Cohere parquet dataset. Ordered smallest -> largest so early
+# failures surface fast. Per dataset: the first config loads the table, the rest reuse it
+# (benchmark_report.py passes --skip-add-embeddings from the 2nd config on).
+#
+#   python benchmark_report.py --manifest report_manifest.parquet-all.yaml --max-queries 1000
+title: "Vector Index Comparison — OpenAI & Cohere, 4 index types"
+db_url: "postgresql://postgres@127.0.0.1:5432/postgres"
+
+datasets:
+  openai-1m-cos:
+    configs:
+      - config/openai-1m-cos/pgvector-m32-256.yaml
+      - config/openai-1m-cos/pgvector-ivfflat-1k.yaml
+      - config/openai-1m-cos/vectorchord-100-4k.yaml
+      - config/openai-1m-cos/edb_vectorplus_ivfplus-1k.yaml
+  cohere-1m-cos:
+    configs:
+      - config/cohere-1m-cos/pgvector-m32-256.yaml
+      - config/cohere-1m-cos/pgvector-ivfflat-1k.yaml
+      - config/cohere-1m-cos/vectorchord-100-4k.yaml
+      - config/cohere-1m-cos/edb_vectorplus-ivfplus-1k.yaml
+  openai-2m-cos:
+    configs:
+      - config/openai-2m-cos/pgvector-m32-256.yaml
+      - config/openai-2m-cos/pgvector-ivfflat-1k.yaml
+      - config/openai-2m-cos/vectorchord-120-8k.yaml
+      - config/openai-2m-cos/edb_vectorplus_ivfplus-1414.yaml
+  cohere-2m-cos:
+    configs:
+      - config/cohere-2m-cos/pgvector-m32-256.yaml
+      - config/cohere-2m-cos/pgvector-ivfflat-1k.yaml
+      - config/cohere-2m-cos/vectorchord-120-8k.yaml
+      - config/cohere-2m-cos/edb_vectorplus-ivfplus-1414.yaml
+  cohere-3m-cos:
+    configs:
+      - config/cohere-3m-cos/pgvector-m32-256.yaml
+      - config/cohere-3m-cos/pgvector-ivfflat-2k.yaml
+      - config/cohere-3m-cos/vectorchord-140-12k.yaml
+      - config/cohere-3m-cos/edb_vectorplus-ivfplus-1800.yaml
+  openai-5m-cos:
+    configs:
+      - config/openai-5m-cos/pgvector-m32-256.yaml
+      - config/openai-5m-cos/pgvector-ivfflat-2k.yaml
+      - config/openai-5m-cos/vectorchord-180-16k.yaml
+      - config/openai-5m-cos/edb_vectorplus-ivfplus-2236.yaml
+  cohere-10m-cos:
+    configs:
+      - config/cohere-10m-cos/pgvector-m32-256.yaml
+      - config/cohere-10m-cos/pgvector-ivfflat-3k.yaml
+      - config/cohere-10m-cos/vectorchord-180-32k.yaml
+      - config/cohere-10m-cos/edb_vectorplus-ivfplus-3162.yaml

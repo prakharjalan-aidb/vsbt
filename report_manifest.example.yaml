@@ -8,34 +8,38 @@ datasets:
         suite: pgvector_suite.py
       - path: config/openai-1m-cos/vectorchord-100-4k.yaml
         suite: vectorchord_suite.py
-  openai-2m-cos:
-    configs:
-      - path: config/openai-2m-cos/edb_vectorplus_ivfplus-1414.yaml
+      - path: config/openai-1m-cos/pgvector-m32-256.yaml
         suite: pgvector_suite.py
-      - path: config/openai-2m-cos/vectorchord-120-8k.yaml
-        suite: vectorchord_suite.py
-  cohere-1m-cos:
-    configs:
-      - path: config/cohere-1m-cos/edb_vectorplus-ivfplus-1k.yaml
+      - path: config/openai-1m-cos/pgvector-ivfflat-1k.yaml
         suite: pgvector_suite.py
-      - path: config/cohere-1m-cos/vectorchord-100-4k.yaml
-        suite: vectorchord_suite.py
-  cohere-2m-cos:
-    configs:
-      - path: config/cohere-2m-cos/edb_vectorplus-ivfplus-1414.yaml
-        suite: pgvector_suite.py
-      - path: config/cohere-2m-cos/vectorchord-120-8k.yaml
-        suite: vectorchord_suite.py
-  cohere-3m-cos:
-      configs:
-      - path: config/cohere-3m-cos/edb_vectorplus-ivfplus-1800.yaml
-        suite: pgvector_suite.py
-      - path: config/cohere-3m-cos/vectorchord-140-12k.yaml
-        suite: vectorchord_suite.py
-  openai-5m-cos:
-      configs:
-      - path: config/openai-5m-cos/edb_vectorplus-ivfplus-2236.yaml
-        suite: pgvector_suite.py
-      - path: config/openai-5m-cos/vectorchord-180-16k.yaml
-        suite: vectorchord_suite.py
+#  openai-2m-cos:
+#    configs:
+#      - path: config/openai-2m-cos/edb_vectorplus_ivfplus-1414.yaml
+#        suite: pgvector_suite.py
+#      - path: config/openai-2m-cos/vectorchord-120-8k.yaml
+#        suite: vectorchord_suite.py
+#  cohere-1m-cos:
+#    configs:
+#      - path: config/cohere-1m-cos/edb_vectorplus-ivfplus-1k.yaml
+#        suite: pgvector_suite.py
+#      - path: config/cohere-1m-cos/vectorchord-100-4k.yaml
+#        suite: vectorchord_suite.py
+#  cohere-2m-cos:
+#    configs:
+#      - path: config/cohere-2m-cos/edb_vectorplus-ivfplus-1414.yaml
+#        suite: pgvector_suite.py
+#      - path: config/cohere-2m-cos/vectorchord-120-8k.yaml
+#        suite: vectorchord_suite.py
+#  cohere-3m-cos:
+#      configs:
+#      - path: config/cohere-3m-cos/edb_vectorplus-ivfplus-1800.yaml
+#        suite: pgvector_suite.py
+#      - path: config/cohere-3m-cos/vectorchord-140-12k.yaml
+#        suite: vectorchord_suite.py
+#  openai-5m-cos:
+#      configs:
+#      - path: config/openai-5m-cos/edb_vectorplus-ivfplus-2236.yaml
+#        suite: pgvector_suite.py
+#      - path: config/openai-5m-cos/vectorchord-180-16k.yaml
+#        suite: vectorchord_suite.py
 

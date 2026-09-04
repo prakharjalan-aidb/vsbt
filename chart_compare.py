@@ -122,7 +122,8 @@ def make_series_label(meta: dict) -> str:
         return f"{suite} lists={lists} (sb={sb}, {cache})"
 
 
-def find_latest_run_id(rows: list[dict], test_name: str, sb: str = None, cache_mode: str = None) -> str:
+def find_latest_run_id(rows: list[dict], test_name: str, sb: str = None, cache_mode: str = None,
+                       clients: str = None) -> str:
     """Find the latest run_id for a test_name with optional filters."""
     candidates = []
     for row in rows:
@@ -133,6 +134,8 @@ def find_latest_run_id(rows: list[dict], test_name: str, sb: str = None, cache_m
         if cache_mode == "with" and row.get("fs_cache") != "True":
             continue
         if cache_mode == "without" and row.get("fs_cache") != "False":
+            continue
+        if clients and row.get("query_clients") != clients:
             continue
         candidates.append(row["run_id"])
 
@@ -211,6 +214,7 @@ def main():
     parser.add_argument("--tests", nargs="+", help="Test names to compare (uses latest run for each)")
     parser.add_argument("--sb", type=str, help="Filter by shared_buffers size (e.g., '700GB')")
     parser.add_argument("--cache-mode", choices=["with", "without"], help="Filter by cache mode")
+    parser.add_argument("--clients", type=str, help="Filter by query_clients (e.g., '32')")
     parser.add_argument("--output", type=str, default="./results/comparisons",
                         help="Output directory for charts")
     parser.add_argument("--results-dir", type=str, default="./results",
@@ -231,7 +235,8 @@ def main():
         run_ids = args.runs
     elif args.tests:
         for test_name in args.tests:
-            rid = find_latest_run_id(rows, test_name, sb=args.sb, cache_mode=args.cache_mode)
+            rid = find_latest_run_id(rows, test_name, sb=args.sb, cache_mode=args.cache_mode,
+                                     clients=args.clients)
             if rid:
                 run_ids.append(rid)
                 print(f"Using run {rid} for {test_name}")
