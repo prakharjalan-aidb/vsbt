@@ -18,6 +18,8 @@ def demo():
     # --- metric tables ---
     assert vp.metric_opclass("cos") == "vector_cosine_ops"
     assert vp.metric_opclass("euclidean") == "vector_l2_ops"
+    assert vp.metric_opclass("cos", "halfvec") == "halfvec_cosine_ops"
+    assert vp.metric_opclass("ip", "halfvec") == "halfvec_ip_ops"
     assert vp.metric_operator("ip") == "<#>"
     assert _raises(vp.metric_opclass, "jaccard")
     assert _raises(vp.metric_operator, "jaccard")
@@ -40,6 +42,11 @@ def demo():
     assert "CREATE INDEX cohere_1m_cos_embedding_idx ON cohere_1m_cos" in ddl
     assert "USING ivfplus (embedding vector_cosine_ops)" in ddl
     assert ddl.endswith("WITH (lists = 1000)")
+    ddl = vp.create_index_sql(
+        "t_halfvec", {"lists": 10},
+        {"metric": "ip", "num": 100, "vector_type": "halfvec"},
+    )
+    assert "ON t_halfvec USING ivfplus (embedding halfvec_ip_ops)" in ddl
 
     # --- query template matches common.TestSuite.warmup_query ---
     import common
@@ -54,7 +61,26 @@ def demo():
     assert label == "Lists"
     assert extract({"lists": 1000}, {}) == "1000"
     assert extract({}, {"lists": 2236}) == "2236"
+    label, extract = vp.CONFIG_COLUMNS[1]
+    assert label == "Vector Type"
+    assert extract({}, {}) == "vector"
+    assert extract({"vectorType": "halfvec"}, {}) == "halfvec"
     assert vp.BENCH_COLUMNS == (("probes", "Probes"),)
+
+    # --- vectorType validated at construction, before any connection ---
+    import tempfile
+
+    def _suite(vector_type):
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as f:
+            f.write(f"t:\n  indexType: ivfplus\n  vectorType: {vector_type}\n"
+                    f"  dataset: openai-5k-cos\n  metric: cos\n  lists: 1\n"
+                    f"  top: 1\n  benchmarks: {{}}\n")
+        return vp.TestSuite(suite_file=f.name,
+                            url="postgresql://x@localhost:5432/postgres",
+                            devices=None, chunk_size=1)
+
+    _suite("halfvec")
+    assert _raises(_suite, "bit")
 
 
 if __name__ == "__main__":

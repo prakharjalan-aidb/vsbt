@@ -8,6 +8,10 @@ edb_vectorplus builds on pgvector's `vector` type (the extension is
 installed with CASCADE) but ships its own access method and its own
 `ivfplus.*` GUC namespace, so it lives in its own suite module alongside
 pgvector_suite.py / vectorchord_suite.py / pgpu_suite.py.
+
+ivfplus indexes pgvector `vector` or `halfvec` columns; the YAML
+`vectorType` key (default `vector`) picks which one the table is loaded as
+and which opclass family is used. ivfplus has no `bit` opclass.
 """
 
 import argparse
@@ -21,17 +25,17 @@ import pgvector.psycopg
 import common
 from results import ResultsManager
 
-# Operator + opclass per metric. These are pgvector `vector` type names --
-# ivfplus indexes the same type, so it uses the same tables.
+# Operator + opclass per metric. ivfplus opclass names mirror pgvector's:
+# `<vectorType>_<suffix>`, e.g. vector_cosine_ops / halfvec_cosine_ops.
 _METRIC_OPS = {
     "l2": "<->", "euclidean": "<->",
     "cos": "<=>", "angular": "<=>",
     "dot": "<#>", "ip": "<#>",
 }
-_METRIC_FUNCS = {
-    "l2": "vector_l2_ops", "euclidean": "vector_l2_ops",
-    "cos": "vector_cosine_ops",
-    "ip": "vector_ip_ops", "dot": "vector_ip_ops",
+_METRIC_OPCLASS_SUFFIX = {
+    "l2": "l2_ops", "euclidean": "l2_ops",
+    "cos": "cosine_ops",
+    "ip": "ip_ops", "dot": "ip_ops",
 }
 
 # Markdown report columns consumed by ResultsManager. `config_columns` are
@@ -40,6 +44,7 @@ _METRIC_FUNCS = {
 # prepended to the benchmark results table.
 CONFIG_COLUMNS = (
     ("Lists", lambda c, r: str(c.get("lists", r.get("lists", "N/A")))),
+    ("Vector Type", lambda c, r: c.get("vectorType", "vector")),
 )
 BENCH_COLUMNS = (("probes", "Probes"),)
 
@@ -51,11 +56,11 @@ def metric_operator(metric: str) -> str:
     return _METRIC_OPS[metric]
 
 
-def metric_opclass(metric: str) -> str:
-    """Operator class for CREATE INDEX."""
-    if metric not in _METRIC_FUNCS:
+def metric_opclass(metric: str, vector_type: str = "vector") -> str:
+    """Operator class for CREATE INDEX, for a `vector` or `halfvec` column."""
+    if metric not in _METRIC_OPCLASS_SUFFIX:
         raise ValueError(f"Unsupported metric type: {metric}")
-    return _METRIC_FUNCS[metric]
+    return f"{vector_type}_{_METRIC_OPCLASS_SUFFIX[metric]}"
 
 
 def resolve_lists(config: dict, dataset: dict) -> int:
@@ -81,7 +86,7 @@ def probe_gucs(benchmark: dict) -> list[str]:
 def create_index_sql(table_name: str, config: dict, dataset: dict) -> str:
     """CREATE INDEX statement for the ivfplus access method."""
     lists = resolve_lists(config, dataset)
-    opclass = metric_opclass(dataset["metric"])
+    opclass = metric_opclass(dataset["metric"], dataset.get("vector_type", "vector"))
     return (
         f"CREATE INDEX {table_name}_embedding_idx ON {table_name} "
         f"USING ivfplus (embedding {opclass}) "
@@ -93,7 +98,8 @@ def print_index_config(config: dict, dataset: dict) -> None:
     """Debug banner printed before the index build."""
     print(f"\n🔧 Index Configuration (ivfplus):")
     print(f"    • Lists:           {resolve_lists(config, dataset)}")
-    print(f"    • Metric Function: {metric_opclass(dataset['metric'])}")
+    print(f"    • Metric Function: "
+          f"{metric_opclass(dataset['metric'], dataset.get('vector_type', 'vector'))}")
     print()
 
 
