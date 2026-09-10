@@ -32,15 +32,6 @@ def demo():
     # --- session GUCs ---
     assert vp.probe_gucs({"probes": 80})[0] == "SET ivfplus.probes = 80"
     assert "SET enable_seqscan = off" in vp.probe_gucs({"probes": 1})
-    assert vp.fixed_gucs({}) == []
-    assert vp.fixed_gucs({"lists": 10}) == []          # unrelated keys ignored
-    assert vp.fixed_gucs({"iterative_scan": "relaxed_order", "max_probes": 2000}) == [
-        "SET ivfplus.iterative_scan = 'relaxed_order'",
-        "SET ivfplus.max_probes = 2000",
-    ]
-    assert vp.fixed_gucs({"hierarchy_threshold": 4}) == [
-        "SET ivfplus.hierarchy_threshold = 4"
-    ]
 
     # --- DDL ---
     ddl = vp.create_index_sql(
@@ -48,8 +39,7 @@ def demo():
     )
     assert "CREATE INDEX cohere_1m_cos_embedding_idx ON cohere_1m_cos" in ddl
     assert "USING ivfplus (embedding vector_cosine_ops)" in ddl
-    assert "lists = 1000" in ddl
-    assert "rotation = true" in ddl
+    assert ddl.endswith("WITH (lists = 1000)")
 
     # --- query template matches common.TestSuite.warmup_query ---
     import common

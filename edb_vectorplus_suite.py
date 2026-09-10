@@ -78,33 +78,14 @@ def probe_gucs(benchmark: dict) -> list[str]:
     ]
 
 
-def fixed_gucs(config: dict) -> list[str]:
-    """Optional suite-level session GUCs, fixed across the whole probe
-    sweep. Omitted keys fall back to the extension's own defaults."""
-    stmts = []
-    iterative_scan = config.get("iterative_scan")
-    if iterative_scan is not None:
-        stmts.append(f"SET ivfplus.iterative_scan = '{iterative_scan}'")
-    max_probes = config.get("max_probes")
-    if max_probes is not None:
-        stmts.append(f"SET ivfplus.max_probes = {max_probes}")
-    hierarchy_threshold = config.get("hierarchy_threshold")
-    if hierarchy_threshold is not None:
-        stmts.append(f"SET ivfplus.hierarchy_threshold = {hierarchy_threshold}")
-    return stmts
-
-
 def create_index_sql(table_name: str, config: dict, dataset: dict) -> str:
     """CREATE INDEX statement for the ivfplus access method."""
     lists = resolve_lists(config, dataset)
     opclass = metric_opclass(dataset["metric"])
-    # Rotation is always on. The `rotation:` key some configs carry is not
-    # read yet -- honouring it would change index build behaviour, so it is
-    # left for a separate change.
     return (
         f"CREATE INDEX {table_name}_embedding_idx ON {table_name} "
         f"USING ivfplus (embedding {opclass}) "
-        f"WITH (lists = {lists}, rotation = true)"
+        f"WITH (lists = {lists})"
     )
 
 
@@ -152,13 +133,6 @@ class TestSuite(common.TestSuite):
                 f"got {wrong}. Use pgvector_suite.py for hnsw / ivfflat / "
                 f"ivfflat_bq_rerank configs."
             )
-        # Resolved per sub-config in run_suite(), which is the outermost
-        # hook that knows the suite name.
-        self._fixed_gucs: list[str] = []
-
-    def run_suite(self, name: str):
-        self._fixed_gucs = fixed_gucs(self.config[name])
-        return super().run_suite(name)
 
     # --- connection / extension -------------------------------------------
 
@@ -208,13 +182,8 @@ class TestSuite(common.TestSuite):
 
     # --- query execution --------------------------------------------------
 
-    def session_gucs(self, benchmark: dict) -> list[str]:
-        """All session GUCs for one benchmark point: the swept `probes`
-        value plus any suite-level fixed GUCs."""
-        return probe_gucs(benchmark) + self._fixed_gucs
-
     def apply_session_guc(self, conn, benchmark):
-        for stmt in self.session_gucs(benchmark):
+        for stmt in probe_gucs(benchmark):
             conn.execute(stmt)
 
     @staticmethod
@@ -267,7 +236,7 @@ class TestSuite(common.TestSuite):
             metric_operator(metric),
             self.url,
             table_name,
-            self.session_gucs(benchmark),
+            probe_gucs(benchmark),
             warmup_n,
         )
 
@@ -284,7 +253,6 @@ class TestSuite(common.TestSuite):
         maintenance_work_mem = config.get("maintenance_work_mem")
 
         self.results[suite_name]["lists"] = resolve_lists(config, dataset)
-        self.results[suite_name]["rotation"] = True
 
         if self.debug:
             print_index_config(config, dataset)
