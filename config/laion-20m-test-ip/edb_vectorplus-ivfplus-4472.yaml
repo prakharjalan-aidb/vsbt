@@ -1,9 +1,10 @@
-thonedb_vectorplus-ivfplus-cohere-1m-1k:
+edb_vectorplus-ivfplus-laion-20m-4472:
   indexType: ivfplus
-  dataset: cohere-1m-cos
-  datasetType: parquet
-  metric: cos
-  lists: 1000
+  dataset: laion-20m-test-ip
+  datasetType: hdf5
+  metric: dot
+  lists: 4472  # ~sqrt(20M)
+  rotation: true
   maintenance_work_mem: 4GB
   pg_parallel_workers: 32
   top: 10

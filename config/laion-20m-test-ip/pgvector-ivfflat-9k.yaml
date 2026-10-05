@@ -1,0 +1,15 @@
+pgvector-ivfflat-laion-20m-4472:
+  indexType: ivfflat
+  dataset: laion-20m-test-ip
+  datasetType: hdf5
+  metric: dot
+  lists: 4472  # ~2*sqrt(20M)
+  maintenance_work_mem: 64GB
+  pg_parallel_workers: 32
+  top: 10
+  benchmarks:
+    "60":  { probes: 60 }
+    "120": { probes: 120 }
+    "240": { probes: 240 }
+    "400": { probes: 400 }
+    "700": { probes: 700 }
